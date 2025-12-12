@@ -3,6 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from src.core.db import Base, engine, get_db
+from src.core.config import get_settings
+from src.api.auth import router as auth_router
+from src.api.transactions import router as transactions_router
+from src.api.openapi_overrides import apply_openapi_overrides
+from src.api.docs_helper import router as docs_helper_router
 
 # Create FastAPI app with metadata and tags for better OpenAPI
 app = FastAPI(
@@ -11,17 +16,28 @@ app = FastAPI(
     version="0.1.0",
     openapi_tags=[
         {"name": "health", "description": "Health and status endpoints"},
+        {"name": "auth", "description": "Authentication endpoints"},
+        {"name": "transactions", "description": "Transaction management endpoints"},
     ],
 )
 
-# CORS configuration
+# CORS configuration using env-driven settings with permissive default for development
+settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Consider restricting in production via env
+    allow_origins=settings.ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register API routers
+app.include_router(auth_router)
+app.include_router(transactions_router)
+app.include_router(docs_helper_router)
+
+# Apply OpenAPI overrides (adds securitySchemes for OAuth2 password flow)
+apply_openapi_overrides(app)
 
 
 @app.on_event("startup")

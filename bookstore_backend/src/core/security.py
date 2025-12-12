@@ -13,6 +13,7 @@ from src.models.models import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# tokenUrl must match the login route for interactive docs to work with OAuth2 password flow
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
