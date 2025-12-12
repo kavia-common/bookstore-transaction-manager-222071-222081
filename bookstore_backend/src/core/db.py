@@ -1,14 +1,17 @@
+import os
 from contextlib import contextmanager
 from typing import Generator, Optional
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
-from src.core.config import get_settings
+from dotenv import load_dotenv
 
-# Resolve database URL via centralized settings
-settings = get_settings()
-DATABASE_URL: str = settings.DATABASE_URL
+# Load environment variables from .env (if present)
+load_dotenv()
+
+# Resolve database URL with a default to local SQLite file
+DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./bookstore.db")
 
 # For SQLite, need to allow check_same_thread=False for multi-threaded FastAPI
 connect_args: Optional[dict] = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else None
