@@ -2,7 +2,12 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
+from src.api.auth import router as auth_router
+from src.api.transactions import router as transactions_router
+from src.core.config import get_settings
 from src.core.db import Base, engine, get_db
+
+settings = get_settings()
 
 # Create FastAPI app with metadata and tags for better OpenAPI
 app = FastAPI(
@@ -11,13 +16,15 @@ app = FastAPI(
     version="0.1.0",
     openapi_tags=[
         {"name": "health", "description": "Health and status endpoints"},
+        {"name": "auth", "description": "Authentication endpoints"},
+        {"name": "transactions", "description": "Transaction management endpoints"},
     ],
 )
 
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Consider restricting in production via env
+    allow_origins=settings.ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,3 +50,8 @@ def health_check(db: Session = Depends(get_db)):
     """
     # Optionally perform a lightweight DB interaction in future
     return {"message": "Healthy"}
+
+
+# Include API routers
+app.include_router(auth_router)
+app.include_router(transactions_router)
