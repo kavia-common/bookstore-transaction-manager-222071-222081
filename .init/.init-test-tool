@@ -1,0 +1,4 @@
+{
+    "command": "pytest",
+    "working_directory": "/home/kavia/workspace/code-generation/bookstore-transaction-manager-222071-222081/bookstore_backend"
+}
